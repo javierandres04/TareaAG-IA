@@ -9,165 +9,281 @@ Released under the MIT license: http://jsbin.mit-license.org
 -->
 <meta name="robots" content="noindex">
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>JS Bin</title>
 </head>
+
 <body>
 
-	<H3>UNIVERSIDAD DE COSTA RICA</H3>
-<H4>GENETIC ALGORITHMS SCAFFOLDING</H4>
-LOADS AN IMAGE FROM LOREMPIXEL, CREATES RANDOM IMAGES AND ESTIMATES SIMILARITY (THE LOWER THE NUMBER THE MORE SIMILAR, ASSUMING SIMILARITY AS A PIXEL PER PIXEL COLOR COMPARISON).<BR>
-
-<canvas id="canvas" width="100" height="100"></canvas> 
-<table id="table"></table>
-<style>canvas {padding: 3px ;}</style>
-<script>
-function Figura (tipo, x, y) {
-    this.tipo = tipo;
-    this.x  = x;
-    this.y  = y;
-    this.toString= function() {
-      return "FIGURA: Tipo: "+this.tipo+" [x:"+this.x+" , y:"+this.y+"]";
+  <H3>UNIVERSIDAD DE COSTA RICA</H3>
+  <H4>GENETIC ALGORITHMS SCAFFOLDING</H4>
+  LOADS AN IMAGE FROM LOREMPIXEL, CREATES RANDOM IMAGES AND ESTIMATES SIMILARITY (THE LOWER THE NUMBER THE MORE SIMILAR,
+  ASSUMING SIMILARITY AS A PIXEL PER PIXEL COLOR COMPARISON).<button id='Avanzar'>Avanzar 10 generaciones</button><BR>
+  <canvas id="canvas" width="100" height="100"></canvas>
+  <table id="table"></table>
+  <style>
+    canvas {
+      padding: 3px;
     }
-}
+  </style>
+  <script>
 
+    let generaciones = 0;
+    var img = new Image;
+    var src = "https://i.picsum.photos/id/9/200/300.jpg?hmac=BguC5kAGl-YR4FEjhjm0b2XWbynYsk3s3QQZUie5aBo";
+    var cvs = document.getElementById('canvas');
+    var ctx = cvs.getContext('2d');
+    img.crossOrigin = "Anonymous";
+    canvas = [];
+    context = [];
+    var imgData;
+    var nImages = 20;
+    var imageData = [];
+    var dataVector = [];
+    var oldDataVector = [];
+    img.src = src;
 
-function CrearPoblaciónInicial() {
-   var individuo = new Array();
-   for (var i = 0; i < 5; i++) {
-       var tipo = 'círculo';
-       var x = Math.random()*100;
-       var y = Math.random()*100;
-           
-       individuo[i] = new Figura(tipo, x, y);
-   }
-       
-   console.log(individuo[1].toString());
-}
+    //CREAR POBLACION INICIAL
 
-
-
-var img = new Image;
-var src = "https://picsum.photos/200/300";
-var cvs = document.getElementById('canvas');
-var ctx = cvs.getContext('2d');
-img.crossOrigin = "Anonymous";
-canvas= [];
-context= [];
-var imgData ;
-var nImages= 15 ;
-var imageData= [] ;
-img.onload = function() {
-CrearPoblaciónInicial() ;
-    ctx.drawImage( img, 0, 0 );
-    imgData= ctx.getImageData(0,0,100,100) ;
-    table= document.getElementById('table') ;
-	for (var i=0; i<nImages;i++) {
-    	if (i%5==0) {
-        	row= table.insertRow(table.rows.length) ;
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      imgData = ctx.getImageData(0, 0, 100, 100);
+      table = document.getElementById('table');
+      row = table.insertRow(table.rows.length);
+      h2 = document.createElement('h2');
+      h2.innerText = `Generación: ${generaciones}`
+      row.appendChild(h2);
+      for (let i = 0; i < nImages; i++) {
+        if (i % 5 == 0) {
+          row = table.insertRow(table.rows.length);
         }
-    	canvas[i]= document.createElement("canvas") ;
-        canvas[i].width= canvas[i].height= "100" ;
-        context[i]= canvas[i].getContext('2d') ;
-        getImage(context[i]) ;
+        canvas[i] = document.createElement("canvas");
+        canvas[i].width = canvas[i].height = "100";
+        context[i] = canvas[i].getContext('2d');
+        let figuresArray = {
+          Figures: [],
+          similarity: 0.0
+        };
+        getImage(context[i], figuresArray);
         //context[i].putImageData(imgData,0,0) ;
-        imageData[i]= context[i].getImageData(0,0,100,100) ;
+        imageData[i] = context[i].getImageData(0, 0, 100, 100);
         context[i].font = 'italic 10pt Calibri';
-        context[i].fillText(similarity(imgData,imageData[i]),10,95) ;
-        row.appendChild(canvas[i]) ;
+        context[i].fillText(similarity(imgData, imageData[i]), 10, 95);
+        figuresArray.similarity = similarity(imgData, imageData[i]);
+        dataVector.push(figuresArray);
+        row.appendChild(canvas[i]);
+      }
     }
-}
 
-img.src = src;
+    /*
+    Siguiente GEN:  20
+    Mejores:        10
+    individuos x:   2
+    cruces:         4
+    Mutaciones:     3
+    random:         1
+    */
 
-function getImage(context) {
-	nCircles= Math.floor((Math.random() * 3) + 1);
-    nLines= Math.floor((Math.random() * 3) + 1);
-    nRectangles= Math.floor((Math.random() * 3) + 1);
-    
-    for (var i=0 ; i<nCircles;i++) {
-		x1= Math.floor((Math.random() * 100) + 1);
-     	y1= Math.floor((Math.random() * 100) + 1);
-    	fill= "#"+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1);
-    	stroke= "#"+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1);
-    	radius= Math.floor((Math.random() * 20) + 1);
-    	lineWidth= Math.floor((Math.random() * 5) + 1);
-    
-		drawCircle(context,x1,y1,radius,fill,3,stroke) ;
+    //EJECUTAR GENERACIONES
+
+    const drawHeader = () => {
+      imgData = ctx.getImageData(0, 0, 100, 100);
+      table = document.getElementById('table');
+      row = table.insertRow(table.rows.length);
+      h2 = document.createElement('h2');
+      h2.innerText = `Generación: ${generaciones}`
+      row.appendChild(h2);
+      let canvas = document.createElement('canvas');
+      canvas.width = canvas.height = '100';
+      canvasContext = canvas.getContext('2d');
+      row = table.insertRow(table.rows.length);
+      row.appendChild(canvas);
+      canvasContext.drawImage(img, 0, 0);
     }
-    
-    for (var i=0 ; i<nLines;i++) {
-		x1= Math.floor((Math.random() * 100) + 1);
-    	x2= Math.floor((Math.random() * 100) + 1);
-  	  	y1= Math.floor((Math.random() * 100) + 1);
-    	y2= Math.floor((Math.random() * 100) + 1);
-    	stroke= "#"+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1);
-    	lineWidth= Math.floor((Math.random() * 5) + 1);
-    
-		drawLine(context,x1,y1,x2,y2,lineWidth,stroke) ;
-    }
-    
-    for (var i=0 ; i<nRectangles;i++) {
-		x1= Math.floor((Math.random() * 100) + 1);
-    	x2= Math.floor((Math.random() * 100) + 1);
-  	  	y1= Math.floor((Math.random() * 100) + 1);
-    	y2= Math.floor((Math.random() * 100) + 1);
-    	fill= "#"+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1);
-    	stroke= "#"+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1);
-    	lineWidth= Math.floor((Math.random() * 5) + 1);
-    
-    	drawRectangle(context,x1,y1,x2,y2,fill,lineWidth,stroke) ;
-	}
-}
 
-function drawRectangle(context,x1,y1,x2,y2,fill,lineWidth,stroke) {
-	  context.beginPath();
+
+    const cruzarIndividuos = (context, figuresArray) => {
+      let individuo1 = Math.floor(Math.random() * 20);
+      let individuo2 = Math.floor(Math.random() * 20);
+      while (individuo1 === individuo2) {
+        individuo2 = Math.floor(Math.random() * 20);
+      }
+      cantidadFigurasI1 = oldDataVector[individuo1].Figures.length;
+      cantidadFigurasI2 = oldDataVector[individuo2].Figures.length;
+      cantFigurasHijo = Math.floor((cantidadFigurasI1 + cantidadFigurasI2) / 2) + Math.floor(Math.random() * 2);
+
+      for (let i = 0; i < cantFigurasHijo; i++) {
+      }
+
+    }
+
+    document.getElementById('Avanzar').onclick = () => {
+      for (let index = 0; index < 10; index++) {
+        oldDataVector = dataVector;
+        dataVector = [];
+        generaciones++;
+        drawHeader();
+        for (let i = 0; i < nImages; i++) {
+          if (i % 5 == 0) {
+            row = table.insertRow(table.rows.length);
+          }
+          canvas[i] = document.createElement("canvas");
+          canvas[i].width = canvas[i].height = "100";
+          context[i] = canvas[i].getContext('2d');
+          let figuresArray = {
+            Figures: [],
+            similarity: 0.0
+          };
+
+          if (i < 10) {
+            // Escoger 10 mejores
+          }
+          else if (i < 12) {
+            //agarrar 2 individuos que no llegaron a los 10 mejores
+          }
+          else if (i < 16) {
+            //Obtener 4 cruces de individuos de la ultima generacion
+            cruzarIndividuos(context[i], figuresArray);
+          }
+          else if (i < 19) {
+            //Sacar mutaciones de 3 individuos random de la ultima generacion
+          }
+          else {
+            //Crear un nuevo individuo random
+          }
+
+          getImage(context[i], figuresArray);
+          //context[i].putImageData(imgData,0,0) ;
+          imageData[i] = context[i].getImageData(0, 0, 100, 100);
+          context[i].font = 'italic 10pt Calibri';
+          context[i].fillText(similarity(imgData, imageData[i]), 10, 95);
+          figuresArray.similarity = similarity(imgData, imageData[i]);
+          dataVector.push(figuresArray);
+          row.appendChild(canvas[i]);
+        }
+      }
+      console.log(dataVector);
+    }
+
+
+    function getImage(context, figuresArray) {
+      nCircles = Math.floor((Math.random() * 3) + 1);
+      nLines = Math.floor((Math.random() * 3) + 1);
+      nRectangles = Math.floor((Math.random() * 3) + 1);
+
+      for (var i = 0; i < nCircles; i++) {
+        x1 = Math.floor((Math.random() * 100) + 1);
+        y1 = Math.floor((Math.random() * 100) + 1);
+        fill = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        stroke = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        radius = Math.floor((Math.random() * 20) + 1);
+        lineWidth = Math.floor((Math.random() * 5) + 1);
+
+        let circleObj = {
+          x1: x1,
+          y1: y1,
+          radius: radius,
+          stroke: stroke,
+          fill: fill,
+          type: 'c'
+        }
+        figuresArray.Figures.push(circleObj);
+        drawCircle(context, x1, y1, radius, fill, 3, stroke);
+      }
+
+      for (var i = 0; i < nLines; i++) {
+        x1 = Math.floor((Math.random() * 100) + 1);
+        x2 = Math.floor((Math.random() * 100) + 1);
+        y1 = Math.floor((Math.random() * 100) + 1);
+        y2 = Math.floor((Math.random() * 100) + 1);
+        // stroke = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        lineWidth = Math.floor((Math.random() * 5) + 1);
+
+        let lineObj = {
+          x1: x1,
+          y1: y1,
+          x2: x2,
+          y2: y2,
+          lineWith: lineWidth,
+          stroke: stroke,
+          type: 'l'
+        }
+        figuresArray.Figures.push(lineObj);
+        drawLine(context, x1, y1, x2, y2, lineWidth, stroke);
+      }
+
+      for (var i = 0; i < nRectangles; i++) {
+        x1 = Math.floor((Math.random() * 100) + 1);
+        x2 = Math.floor((Math.random() * 100) + 1);
+        y1 = Math.floor((Math.random() * 100) + 1);
+        y2 = Math.floor((Math.random() * 100) + 1);
+        fill = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        stroke = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        lineWidth = Math.floor((Math.random() * 5) + 1);
+
+        let lineObj = {
+          x1: x1,
+          y1: y1,
+          x2: x2,
+          y2: y2,
+          lineWith: lineWidth,
+          stroke: stroke,
+          fill: fill,
+          type: 'r'
+        }
+        figuresArray.Figures.push(lineObj);
+        drawRectangle(context, x1, y1, x2, y2, fill, lineWidth, stroke);
+      }
+    }
+
+    function drawRectangle(context, x1, y1, x2, y2, fill, lineWidth, stroke) {
+      context.beginPath();
       context.rect(x1, y1, x2, y2);
-      context.fillStyle = fill ;
+      context.fillStyle = fill;
       context.fill();
       context.lineWidth = lineWidth;
       context.strokeStyle = stroke;
       context.stroke();
-}
+    }
 
-function drawLine(context,x1,y1,x2,y2,lineWidth,stroke) {
-	  context.beginPath();
+    function drawLine(context, x1, y1, x2, y2, lineWidth, stroke) {
+      context.beginPath();
       context.moveTo(x1, y1);
       context.lineTo(x2, y2);
-      context.lineWidth= lineWidth ;
-      context.strokeStyle= stroke ;
+      context.lineWidth = lineWidth;
+      context.strokeStyle = stroke;
       context.stroke();
-}
+      stroke
+    }
 
-function drawCircle(context, x,y,radius,fill,lineWidth,stroke) {
-	  context.beginPath();
+    function drawCircle(context, x, y, radius, fill, lineWidth, stroke) {
+      context.beginPath();
       context.arc(x, y, radius, 0, 2 * Math.PI, false);
       context.fillStyle = fill;
       context.fill();
       context.lineWidth = lineWidth;
       context.strokeStyle = stroke;
       context.stroke();
-}
-
-
-function similarity(imageData1, imageData2) {
-	data1= imageData1.data ;
-    data2= imageData2.data ;
-    suma=0 ;
-    for (var i=0;i<data1.length;i+=4) {
-    	suma+= Math.pow((data1[i]-data2[i]),2);
-        suma+= Math.pow((data1[i+1]-data2[i+1]),2);
-        suma+= Math.pow((data1[i+2]-data2[i+2]),2);
-        
     }
-    return Math.pow(suma,1/2) ;
-}
-
-</script>
 
 
-	
+    function similarity(imageData1, imageData2) {
+      data2 = imageData2.data;
+      data1 = imageData1.data;
+      suma = 0;
+      for (var i = 0; i < data1.length; i += 4) {
+        suma += Math.pow((data1[i] - data2[i]), 2);
+        suma += Math.pow((data1[i + 1] - data2[i + 1]), 2);
+        suma += Math.pow((data1[i + 2] - data2[i + 2]), 2);
+
+      }
+      return Math.pow(suma, 1 / 2);
+    }
+
+  </script>
 </body>
+
 </html>
