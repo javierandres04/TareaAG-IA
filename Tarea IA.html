@@ -21,7 +21,7 @@ Released under the MIT license: http://jsbin.mit-license.org
   <H3>UNIVERSIDAD DE COSTA RICA</H3>
   <H4>GENETIC ALGORITHMS SCAFFOLDING</H4>
   LOADS AN IMAGE FROM LOREMPIXEL, CREATES RANDOM IMAGES AND ESTIMATES SIMILARITY (THE LOWER THE NUMBER THE MORE SIMILAR,
-  ASSUMING SIMILARITY AS A PIXEL PER PIXEL COLOR COMPARISON).<button id='Avanzar'>Avanzar 10 generaciones</button><BR>
+  ASSUMING SIMILARITY AS A PIXEL PER PIXEL COLOR COMPARISON).<button id='Avanzar'>Avanzar generaciones</button><BR>
   <canvas id="canvas" width="100" height="100"></canvas>
   <table id="table"></table>
   <style>
@@ -88,6 +88,13 @@ Released under the MIT license: http://jsbin.mit-license.org
     random:         1
     */
 
+
+    /* Pasos
+      Cruces
+      mutaciones - Probabilidad 5-10%
+      aptitud
+      selección
+    */
     //EJECUTAR GENERACIONES
 
     const drawHeader = () => {
@@ -120,29 +127,12 @@ Released under the MIT license: http://jsbin.mit-license.org
       let cantFigurasHijo = Math.floor((cantidadFigurasI1 + cantidadFigurasI2) / 2);
       if (cantFigurasHijo % 2 != 0) {
         cantFigurasHijo += Math.floor(Math.random() * 2);
-        //   if (Math.floor(Math.random() * 2) == 0) {
-        //     ++figurasI1;
-        //   }
-        //   else {
-        //     ++figurasI2;
-        //   }
       }
-      // //if(cantidadFigurasI1 - figurasI1 < 0){figurasI2+= (figurasI1 -cantidadFigurasI1); figurasI1 = cantidadFigurasI1;}
 
-      // figurasI1 += Math.floor(cantFigurasHijo / 2);
-      // figurasI2 += Math.floor(cantFigurasHijo / 2);
-      // for (let i = 0; i < figurasI1; ++i) {
-      //   if (oldDataVector[individuo1].Figures[i] != undefined) {
-
-      //   } else {
-
-      //   }
-      // }
 
       console.log(individuo1, individuo2);
       ///////////////
       let parentsFigures = oldDataVector[individuo1].Figures.concat(oldDataVector[individuo2].Figures);
-      console.log(parentsFigures);
       let figureIndex = 0;
       let figure;
       for (let i = 0; i < cantFigurasHijo; ++i) {
@@ -154,12 +144,12 @@ Released under the MIT license: http://jsbin.mit-license.org
             y1: figure.y1,
             x2: figure.x2,
             y2: figure.y2,
-            lineWith: figure.lineWidth,
+            lineWidth: figure.lineWidth,
             stroke: figure.stroke,
             type: 'l'
           }
           figuresArray.Figures.push(lineObj);
-          drawLine(context, figure.x1, figure.y1, figure.x2, figure.y2, figure.lineWidth, figure.stroke);
+          drawLine(context, lineObj.x1, lineObj.y1, lineObj.x2, lineObj.y2, lineObj.lineWidth, lineObj.stroke);
         }
         else if (figure.type === 'r') {
           let rectangleObj = {
@@ -167,13 +157,13 @@ Released under the MIT license: http://jsbin.mit-license.org
             y1: figure.y1,
             x2: figure.x2,
             y2: figure.y2,
-            lineWith: figure.lineWidth,
+            lineWidth: figure.lineWidth,
             stroke: figure.stroke,
             fill: figure.fill,
             type: 'r'
           }
           figuresArray.Figures.push(rectangleObj);
-          drawRectangle(context, figure.x1, figure.y1, figure.x2, figure.y2, figure.fill, figure.lineWidth, figure.stroke);
+          drawRectangle(context, rectangleObj.x1, rectangleObj.y1, rectangleObj.x2, rectangleObj.y2, rectangleObj.fill, rectangleObj.lineWidth, rectangleObj.stroke);
         }
         else {
           let circleObj = {
@@ -185,9 +175,10 @@ Released under the MIT license: http://jsbin.mit-license.org
             type: 'c'
           }
           figuresArray.Figures.push(circleObj);
-          drawCircle(context, figure.x1, figure.y1, figure.radius, figure.fill, 3, figure.stroke);
+          drawCircle(context, circleObj.x1, circleObj.y1, circleObj.radius, circleObj.fill, 3, circleObj.stroke);
         }
         parentsFigures.splice(figureIndex, 1);
+        console.log(figuresArray);
       }
 
 
@@ -216,24 +207,7 @@ Released under the MIT license: http://jsbin.mit-license.org
             Figures: [],
             similarity: 0.0
           };
-
-          if (i < 10) {
-            // Escoger 10 mejores
-          }
-          else if (i < 12) {
-            //agarrar 2 individuos que no llegaron a los 10 mejores
-          }
-          else if (i < 16) {
-            //Obtener 4 cruces de individuos de la ultima generacion
-            cruzarIndividuos(context[i], figuresArray);
-          }
-          else if (i < 19) {
-            //Sacar mutaciones de 3 individuos random de la ultima generacion
-          }
-          else {
-            //Crear un nuevo individuo random
-          }
-
+          cruzarIndividuos(context[i], figuresArray);
           // getImage(context[i], figuresArray);
           //context[i].putImageData(imgData,0,0) ;
           imageData[i] = context[i].getImageData(0, 0, 100, 100);
@@ -246,6 +220,14 @@ Released under the MIT license: http://jsbin.mit-license.org
       }
     }
 
+    const generateRandomColor = () => {
+      return "#" + Math.floor((Math.random() * 10)) +
+        Math.floor((Math.random() * 10)) +
+        Math.floor((Math.random() * 10)) +
+        Math.floor((Math.random() * 10)) +
+        Math.floor((Math.random() * 10)) +
+        Math.floor((Math.random() * 10));
+    }
 
     function getImage(context, figuresArray) {
       nCircles = Math.floor((Math.random() * 3) + 1);
@@ -255,8 +237,8 @@ Released under the MIT license: http://jsbin.mit-license.org
       for (var i = 0; i < nCircles; i++) {
         x1 = Math.floor((Math.random() * 100) + 1);
         y1 = Math.floor((Math.random() * 100) + 1);
-        fill = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
-        stroke = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        fill = generateRandomColor();
+        stroke = generateRandomColor();
         radius = Math.floor((Math.random() * 20) + 1);
         lineWidth = Math.floor((Math.random() * 5) + 1);
 
@@ -277,7 +259,7 @@ Released under the MIT license: http://jsbin.mit-license.org
         x2 = Math.floor((Math.random() * 100) + 1);
         y1 = Math.floor((Math.random() * 100) + 1);
         y2 = Math.floor((Math.random() * 100) + 1);
-        stroke = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        stroke = "#" + generateRandomColor();
         lineWidth = Math.floor((Math.random() * 5) + 1);
 
         let lineObj = {
@@ -285,7 +267,7 @@ Released under the MIT license: http://jsbin.mit-license.org
           y1: y1,
           x2: x2,
           y2: y2,
-          lineWith: lineWidth,
+          lineWidth: lineWidth,
           stroke: stroke,
           type: 'l'
         }
@@ -298,8 +280,8 @@ Released under the MIT license: http://jsbin.mit-license.org
         x2 = Math.floor((Math.random() * 100) + 1);
         y1 = Math.floor((Math.random() * 100) + 1);
         y2 = Math.floor((Math.random() * 100) + 1);
-        fill = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
-        stroke = "#" + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1) + Math.floor((Math.random() * 100) + 1);
+        fill = generateRandomColor();
+        stroke = generateRandomColor();
         lineWidth = Math.floor((Math.random() * 5) + 1);
 
         let rectangleObj = {
@@ -307,7 +289,7 @@ Released under the MIT license: http://jsbin.mit-license.org
           y1: y1,
           x2: x2,
           y2: y2,
-          lineWith: lineWidth,
+          lineWidth: lineWidth,
           stroke: stroke,
           fill: fill,
           type: 'r'
