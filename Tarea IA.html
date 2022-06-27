@@ -215,27 +215,36 @@ Released under the MIT license: http://jsbin.mit-license.org
 
 
     const mutarColor = (figures) => {
-      const figure = Math.floor(Math.random() * figures.length);
-      if (figures[figure].type === 'l') {
-        figures[figure].stroke = generateRandomColor();
-      } else {
-        figures[figure].stroke = generateRandomColor();
-        figures[figure].fill = generateRandomColor();
+      let figure;
+      const cantidadAMutar = Math.floor(Math.random() * figures.length);
+      for (let i = 0; i < cantidadAMutar; i++) {
+        figure = Math.floor(Math.random() * figures.length);
+        if (figures[figure].type === 'l') {
+          figures[figure].stroke = generateRandomColor();
+        } else {
+          figures[figure].stroke = generateRandomColor();
+          figures[figure].fill = generateRandomColor();
+        }  
       }
+      
     }
     
     
     
     const mutarCoordenadas = (figures) =>{
-      const figure = Math.floor(Math.random() * figures.length);
-      if (figures[figure].type === 'c') {
-        figures[figure].x1 = Math.floor((Math.random() * 100) + 1);
-        figures[figure].y1 = Math.floor((Math.random() * 100) + 1);
-      } else {
-        figures[figure].x1 = Math.floor((Math.random() * 100) + 1);
-        figures[figure].y1 = Math.floor((Math.random() * 100) + 1);
-        figures[figure].x2 = Math.floor((Math.random() * 100) + 1);
-        figures[figure].y2 = Math.floor((Math.random() * 100) + 1);
+      let figure;
+      const cantidadAMutar = Math.floor(Math.random() * figures.length);
+      for(let i = 0; i < cantidadAMutar; ++i){
+        figure = Math.floor(Math.random() * figures.length);
+        if (figures[figure].type === 'c') {
+          figures[figure].x1 = Math.floor((Math.random() * 100) + 1);
+          figures[figure].y1 = Math.floor((Math.random() * 100) + 1);
+        } else {
+          figures[figure].x1 = Math.floor((Math.random() * 100) + 1);
+          figures[figure].y1 = Math.floor((Math.random() * 100) + 1);
+          figures[figure].x2 = Math.floor((Math.random() * 100) + 1);
+          figures[figure].y2 = Math.floor((Math.random() * 100) + 1);
+        }
       }
     }
 
@@ -260,11 +269,15 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
     
     const mutarTamanio = (figures) =>{
-      const figure = Math.floor(Math.random() * figures.length);
-      if(figures[figure].type === 'c') {
-        figures[figure].radius = Math.floor((Math.random() * 20) + 1);
-      }
+      let figure;
+      const cantidadAMutar = Math.floor(Math.random() * figures.length);
+      for (let i = 0; i < cantidadAMutar; i++) {
+        figure = Math.floor(Math.random() * figures.length);
+        if(figures[figure].type === 'c') {
+          figures[figure].radius = Math.floor((Math.random() * 20) + 1);
+        }
         figures[figure].lineWidth = Math.floor((Math.random() * 5) + 1);
+      }
     }
 
 
@@ -272,12 +285,21 @@ Released under the MIT license: http://jsbin.mit-license.org
       let mutaciones = [mutarTamanio, mutarCoordenadas, mutarColor, mutarCantidadFiguras];
       let mutacion;
       let indiceMutacion = Math.floor(Math.random()*mutaciones.length);
-      MutationProbability = Math.floor(Math.random() * 1);
-      if(MutationProbability === 0){
+      MutationProbability = Math.floor(Math.random() * 100);
+      
+      if(MutationProbability  < 25){
         mutacion = mutaciones[indiceMutacion];
         mutacion(canvasObj.Figures);
         mutaciones.splice(indiceMutacion,1);
-        
+        for (let i = 0; i < mutaciones.length; i++) {
+          MutationProbability = Math.floor(Math.random() * 100);
+          if(MutationProbability < 50) {
+            indiceMutacion = Math.floor(Math.random()*mutaciones.length);
+            mutacion = mutaciones[indiceMutacion];
+            mutacion(canvasObj.Figures);
+            mutaciones.splice(indiceMutacion,1);
+          }
+        }
       }
 
       
