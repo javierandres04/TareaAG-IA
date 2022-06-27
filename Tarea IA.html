@@ -246,24 +246,16 @@ Released under the MIT license: http://jsbin.mit-license.org
         figures.splice(figuraElegida, 1);
       }
       else{
-        console.log("antes de agregar la figura");
-        console.log(figures);
-        
         const figuraACrear = Math.floor(Math.random() * 3);
         if(figuraACrear == 0){
           generarLinea(figures);
-          console.log("linea");
         }
         else if(figuraACrear == 1){
           generarRectangulo(figures);
-          console.log("rectangulo");
         }
         else{
           generarCirculo(figures);
-          console.log("circulo");
         }
-        console.log("Se creó la figura");
-        console.log(figures);
       }
     }
     
@@ -277,7 +269,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 
 
     const mutarIndividuo = (canvasObj) => {
-      let mutaciones = [mutarCantidadFiguras] //[mutarTamanio, mutarCoordenadas, mutarColor, mutarCantidadFiguras];
+      let mutaciones = [mutarTamanio, mutarCoordenadas, mutarColor, mutarCantidadFiguras];
       let mutacion;
       let indiceMutacion = Math.floor(Math.random()*mutaciones.length);
       MutationProbability = Math.floor(Math.random() * 1);
