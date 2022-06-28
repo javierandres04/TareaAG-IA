@@ -78,8 +78,6 @@ Released under the MIT license: http://jsbin.mit-license.org
         row.appendChild(canvas[i]);
       }
     }
-
-    console.log(dataVector);
     //EJECUTAR GENERACIONES
 
     const drawHeader = () => {
@@ -101,8 +99,6 @@ Released under the MIT license: http://jsbin.mit-license.org
     const cruzarIndividuos = (canvasObj) => {
       let individuo1 = Math.floor(Math.random() * 20);
       let individuo2 = Math.floor(Math.random() * 20);
-      //let figurasI1 = 0;
-      //let figurasI2 = 0;
 
       while (individuo1 === individuo2) {
         individuo2 = Math.floor(Math.random() * 20);
@@ -113,10 +109,6 @@ Released under the MIT license: http://jsbin.mit-license.org
       if (cantFigurasHijo % 2 != 0) {
         cantFigurasHijo += Math.floor(Math.random() * 2);
       }
-
-
-      console.log(individuo1, individuo2);
-      ///////////////
       let parentsFigures = oldDataVector[individuo1].Figures.concat(oldDataVector[individuo2].Figures);
       let figureIndex = 0;
       let figure;
@@ -134,7 +126,6 @@ Released under the MIT license: http://jsbin.mit-license.org
             type: 'l'
           }
           canvasObj.Figures.push(lineObj);
-          //drawLine(context, lineObj.x1, lineObj.y1, lineObj.x2, lineObj.y2, lineObj.lineWidth, lineObj.stroke);
         }
         else if (figure.type === 'r') {
           let rectangleObj = {
@@ -148,7 +139,6 @@ Released under the MIT license: http://jsbin.mit-license.org
             type: 'r'
           }
           canvasObj.Figures.push(rectangleObj);
-          //drawRectangle(context, rectangleObj.x1, rectangleObj.y1, rectangleObj.x2, rectangleObj.y2, rectangleObj.fill, rectangleObj.lineWidth, rectangleObj.stroke);
         }
         else {
           let circleObj = {
@@ -160,13 +150,11 @@ Released under the MIT license: http://jsbin.mit-license.org
             type: 'c'
           }
           canvasObj.Figures.push(circleObj);
-          //drawCircle(context, circleObj.x1, circleObj.y1, circleObj.radius, circleObj.fill, 3, circleObj.stroke);
         }
         parentsFigures.splice(figureIndex, 1);
-        console.log(canvasObj);
       }
     }
-    
+
     /* Pasos
       Cruces
       mutaciones - Probabilidad 5-10%
@@ -193,14 +181,11 @@ Released under the MIT license: http://jsbin.mit-license.org
           };
           cruzarIndividuos(canvasObj);
           mutarIndividuo(canvasObj);
-
-          // getImage(context[i], canvasObj);
-          //context[i].putImageData(imgData,0,0) ;
           dataVector.push(canvasObj);
           row.appendChild(canvas[i]);
         }
         seleccion();
-        for(let i = 0; i < dataVector.length; i++){
+        for (let i = 0; i < dataVector.length; i++) {
           dibujarFiguras(context[i], dataVector[i]);
         }
       }
@@ -217,15 +202,15 @@ Released under the MIT license: http://jsbin.mit-license.org
         } else {
           figures[figure].stroke = generateRandomColor();
           figures[figure].fill = generateRandomColor();
-        }  
+        }
       }
-      
+
     }
-    
-    const mutarCoordenadas = (figures) =>{
+
+    const mutarCoordenadas = (figures) => {
       let figure;
       const cantidadAMutar = Math.floor(Math.random() * figures.length);
-      for(let i = 0; i < cantidadAMutar; ++i){
+      for (let i = 0; i < cantidadAMutar; ++i) {
         figure = Math.floor(Math.random() * figures.length);
         if (figures[figure].type === 'c') {
           figures[figure].x1 = Math.floor((Math.random() * 100) + 1);
@@ -239,32 +224,32 @@ Released under the MIT license: http://jsbin.mit-license.org
       }
     }
 
-    const mutarCantidadFiguras = (figures) =>{
+    const mutarCantidadFiguras = (figures) => {
       desicion = Math.floor(Math.random() * 2);
-      if(desicion ==  0){
+      if (desicion == 0) {
         figuraElegida = Math.floor(Math.random() * figures.length);
         figures.splice(figuraElegida, 1);
       }
-      else{
+      else {
         const figuraACrear = Math.floor(Math.random() * 3);
-        if(figuraACrear == 0){
+        if (figuraACrear == 0) {
           generarLinea(figures);
         }
-        else if(figuraACrear == 1){
+        else if (figuraACrear == 1) {
           generarRectangulo(figures);
         }
-        else{
+        else {
           generarCirculo(figures);
         }
       }
     }
-    
-    const mutarTamanio = (figures) =>{
+
+    const mutarTamanio = (figures) => {
       let figure;
       const cantidadAMutar = Math.floor(Math.random() * figures.length);
       for (let i = 0; i < cantidadAMutar; i++) {
         figure = Math.floor(Math.random() * figures.length);
-        if(figures[figure].type === 'c') {
+        if (figures[figure].type === 'c') {
           figures[figure].radius = Math.floor((Math.random() * 20) + 1);
         }
         figures[figure].lineWidth = Math.floor((Math.random() * 5) + 1);
@@ -275,24 +260,24 @@ Released under the MIT license: http://jsbin.mit-license.org
     const mutarIndividuo = (canvasObj) => {
       let mutaciones = [mutarTamanio, mutarCoordenadas, mutarColor, mutarCantidadFiguras];
       let mutacion;
-      let indiceMutacion = Math.floor(Math.random()*mutaciones.length);
+      let indiceMutacion = Math.floor(Math.random() * mutaciones.length);
       MutationProbability = Math.floor(Math.random() * 100);
-      
-      if(MutationProbability  < 25){
+
+      if (MutationProbability < 25) {
         mutacion = mutaciones[indiceMutacion];
         mutacion(canvasObj.Figures);
-        mutaciones.splice(indiceMutacion,1);
+        mutaciones.splice(indiceMutacion, 1);
         for (let i = 0; i < mutaciones.length; i++) {
           MutationProbability = Math.floor(Math.random() * 100);
-          if(MutationProbability < 50) {
-            indiceMutacion = Math.floor(Math.random()*mutaciones.length);
+          if (MutationProbability < 50) {
+            indiceMutacion = Math.floor(Math.random() * mutaciones.length);
             mutacion = mutaciones[indiceMutacion];
             mutacion(canvasObj.Figures);
-            mutaciones.splice(indiceMutacion,1);
+            mutaciones.splice(indiceMutacion, 1);
           }
         }
       }
-      
+
     }
 
     /*
@@ -300,15 +285,12 @@ Released under the MIT license: http://jsbin.mit-license.org
     Mejores:        16 de los 40
     peores  : 2
     espontaneos: 2
-
     */
-
-
     const calcularAptitud = (vectorIndividuos) => {
       let canvas;
       let context;
       let aptitud;
-      for (let i= 0; i < vectorIndividuos.length;i++) {
+      for (let i = 0; i < vectorIndividuos.length; i++) {
         canvas = document.createElement("canvas");
         canvas.width = canvas.height = "100";
         context = canvas.getContext("2d");
@@ -316,27 +298,26 @@ Released under the MIT license: http://jsbin.mit-license.org
         imageData[i] = context.getImageData(0, 0, 100, 100);
         context.font = 'italic 10pt Calibri';
         aptitud = similarity(imgData, imageData[i]);
-        console.log(aptitud);
         vectorIndividuos[i].similarity = aptitud;
       }
     }
 
-    const seleccion = () =>{
+    const seleccion = () => {
       vectorIndividuos = dataVector.concat(oldDataVector);
       calcularAptitud(vectorIndividuos);
       dataVector = [];
-      vectorIndividuos.sort(function(a, b){return a.similarity - b.similarity});
-      for(let i = 0; i < 16; ++i){
+      vectorIndividuos.sort(function (a, b) { return a.similarity - b.similarity });
+      for (let i = 0; i < 16; ++i) {
         //Sacar los más aptos entre cruzados y padres
         dataVector.push(vectorIndividuos[i]);
-        vectorIndividuos.splice(i,1);
+        vectorIndividuos.splice(i, 1);
       }
-      for(let i = 0; i < 2; ++i){
+      for (let i = 0; i < 2; ++i) {
         randomSeleccionado = Math.floor(Math.random() * vectorIndividuos.length);
         dataVector.push(vectorIndividuos[randomSeleccionado]);
         vectorIndividuos.splice(randomSeleccionado, 1);
       }
-      for(let i = 0; i < 2; ++i){
+      for (let i = 0; i < 2; ++i) {
         let canvasObj = {
           Figures: [],
           similarity: 0.0
@@ -353,22 +334,22 @@ Released under the MIT license: http://jsbin.mit-license.org
         dataVector.push(canvasObj);
       }
     }
-   
+
 
     const dibujarFiguras = (context, canvasObj) => {
-      for (let i = 0; i < canvasObj.Figures.length; i++){
+      for (let i = 0; i < canvasObj.Figures.length; i++) {
         let theFigure = canvasObj.Figures[i];
-        if(theFigure.type === 'l'){
+        if (theFigure.type === 'l') {
           drawLine(context, theFigure.x1, theFigure.y1, theFigure.x2, theFigure.y2, theFigure.lineWidth, theFigure.stroke);
         }
-        else if(theFigure.type === 'r'){
+        else if (theFigure.type === 'r') {
           drawRectangle(context, theFigure.x1, theFigure.y1, theFigure.x2, theFigure.y2, theFigure.fill, theFigure.lineWidth, theFigure.stroke);
         }
-        else{
+        else {
           drawCircle(context, theFigure.x1, theFigure.y1, theFigure.radius, theFigure.fill, 3, theFigure.stroke);
         }
       }
-      
+
       context.fillText(canvasObj.similarity, 10, 95);
     }
 
@@ -436,8 +417,8 @@ Released under the MIT license: http://jsbin.mit-license.org
       return circleObj;
     }
 
-    
-    
+
+
     const generateRandomColor = () => {
       return "#" + Math.floor((Math.random() * 10)) +
         Math.floor((Math.random() * 10)) +
@@ -513,7 +494,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 </body>
 
 </html>
-  </script>
+</script>
 </body>
 
 </html>
