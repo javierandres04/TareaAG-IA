@@ -22,7 +22,7 @@ Released under the MIT license: http://jsbin.mit-license.org
   <H4>GENETIC ALGORITHMS SCAFFOLDING</H4>
   LOADS AN IMAGE FROM LOREMPIXEL, CREATES RANDOM IMAGES AND ESTIMATES SIMILARITY (THE LOWER THE NUMBER THE MORE SIMILAR,
   ASSUMING SIMILARITY AS A PIXEL PER PIXEL COLOR COMPARISON).<button id='Avanzar'>Avanzar generaciones</button><BR>
-  <canvas id="canvas" width="100" height="100"></canvas>
+  <canvas id="canvas" width="100" height="100" hidden></canvas>
   <table id="table"></table>
   <style>
     canvas {
@@ -67,7 +67,8 @@ Released under the MIT license: http://jsbin.mit-license.org
           Figures: [],
           similarity: 0.0
         };
-        getImage(context[i], canvasObj);
+        getImage(canvasObj);
+        dibujarFiguras(context[i], canvasObj);
         //context[i].putImageData(imgData,0,0) ;
         imageData[i] = context[i].getImageData(0, 0, 100, 100);
         context[i].font = 'italic 10pt Calibri';
@@ -79,21 +80,6 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
 
     console.log(dataVector);
-    /*
-    Siguiente GEN:  20
-    Mejores:        16 de los 40
-    peores  : 2
-    espontaneos: 2
-
-    */
-
-
-    /* Pasos
-      Cruces
-      mutaciones - Probabilidad 5-10%
-      aptitud
-      selección
-    */
     //EJECUTAR GENERACIONES
 
     const drawHeader = () => {
@@ -180,9 +166,16 @@ Released under the MIT license: http://jsbin.mit-license.org
         console.log(canvasObj);
       }
     }
+    
+    /* Pasos
+      Cruces
+      mutaciones - Probabilidad 5-10%
+      aptitud
+      selección
+    */
 
     document.getElementById('Avanzar').onclick = () => {
-      for (let index = 0; index < 1; index++) {
+      for (let index = 0; index < 200; index++) {
         oldDataVector = dataVector;
         dataVector = [];
         generaciones++;
@@ -200,15 +193,15 @@ Released under the MIT license: http://jsbin.mit-license.org
           };
           cruzarIndividuos(canvasObj);
           mutarIndividuo(canvasObj);
-          dibujarFiguras(context[i], canvasObj);
+
           // getImage(context[i], canvasObj);
           //context[i].putImageData(imgData,0,0) ;
-          imageData[i] = context[i].getImageData(0, 0, 100, 100);
-          context[i].font = 'italic 10pt Calibri';
-          context[i].fillText(similarity(imgData, imageData[i]), 10, 95);
-          canvasObj.similarity = similarity(imgData, imageData[i]);
           dataVector.push(canvasObj);
           row.appendChild(canvas[i]);
+        }
+        seleccion();
+        for(let i = 0; i < dataVector.length; i++){
+          dibujarFiguras(context[i], dataVector[i]);
         }
       }
     }
@@ -302,6 +295,66 @@ Released under the MIT license: http://jsbin.mit-license.org
       
     }
 
+    /*
+    Siguiente GEN:  20
+    Mejores:        16 de los 40
+    peores  : 2
+    espontaneos: 2
+
+    */
+
+
+    const calcularAptitud = (vectorIndividuos) => {
+      let canvas;
+      let context;
+      let aptitud;
+      for (let i= 0; i < vectorIndividuos.length;i++) {
+        canvas = document.createElement("canvas");
+        canvas.width = canvas.height = "100";
+        context = canvas.getContext("2d");
+        dibujarFiguras(context, vectorIndividuos[i]);
+        imageData[i] = context.getImageData(0, 0, 100, 100);
+        context.font = 'italic 10pt Calibri';
+        aptitud = similarity(imgData, imageData[i]);
+        console.log(aptitud);
+        vectorIndividuos[i].similarity = aptitud;
+      }
+    }
+
+    const seleccion = () =>{
+      vectorIndividuos = dataVector.concat(oldDataVector);
+      calcularAptitud(vectorIndividuos);
+      dataVector = [];
+      vectorIndividuos.sort(function(a, b){return a.similarity - b.similarity});
+      for(let i = 0; i < 16; ++i){
+        //Sacar los más aptos entre cruzados y padres
+        dataVector.push(vectorIndividuos[i]);
+        vectorIndividuos.splice(i,1);
+      }
+      for(let i = 0; i < 2; ++i){
+        randomSeleccionado = Math.floor(Math.random() * vectorIndividuos.length);
+        dataVector.push(vectorIndividuos[randomSeleccionado]);
+        vectorIndividuos.splice(randomSeleccionado, 1);
+      }
+      for(let i = 0; i < 2; ++i){
+        let canvasObj = {
+          Figures: [],
+          similarity: 0.0
+        };
+        getImage(canvasObj);
+        let canvas = document.createElement("canvas");
+        canvas.width = canvas.height = "100";
+        let context = canvas.getContext("2d");
+        dibujarFiguras(context, canvasObj);
+        imageData[i] = context.getImageData(0, 0, 100, 100);
+        context.font = 'italic 10pt Calibri';
+        aptitud = similarity(imgData, imageData[i]);
+        canvasObj.similarity = aptitud;
+        dataVector.push(canvasObj);
+      }
+    }
+   
+
     const dibujarFiguras = (context, canvasObj) => {
       for (let i = 0; i < canvasObj.Figures.length; i++){
         let theFigure = canvasObj.Figures[i];
@@ -315,6 +368,8 @@ Released under the MIT license: http://jsbin.mit-license.org
           drawCircle(context, theFigure.x1, theFigure.y1, theFigure.radius, theFigure.fill, 3, theFigure.stroke);
         }
       }
+      
+      context.fillText(canvasObj.similarity, 10, 95);
     }
 
     const generarLinea = (figures) => {
@@ -392,24 +447,21 @@ Released under the MIT license: http://jsbin.mit-license.org
         Math.floor((Math.random() * 10));
     }
 
-    function getImage(context, canvasObj) {
+    function getImage(canvasObj) {
       nCircles = Math.floor((Math.random() * 3) + 1);
       nLines = Math.floor((Math.random() * 3) + 1);
       nRectangles = Math.floor((Math.random() * 3) + 1);
 
       for (var i = 0; i < nCircles; i++) {
         circulo = generarCirculo(canvasObj.Figures);
-        drawCircle(context, circulo.x1, circulo.y1, circulo.radius, circulo.fill, 3, circulo.stroke);
       }
 
       for (var i = 0; i < nLines; i++) {
         linea = generarLinea(canvasObj.Figures);
-        drawLine(context, linea.x1, linea.y1, linea.x2, linea.y2, linea.lineWidth, linea.stroke);
       }
 
       for (var i = 0; i < nRectangles; i++) {
         rectangulo = generarRectangulo(canvasObj.Figures);
-        drawRectangle(context, rectangulo.x1, rectangulo.y1, rectangulo.x2, rectangulo.y2, rectangulo.fill, rectangulo.lineWidth, rectangulo.stroke);
       }
     }
 
@@ -457,6 +509,10 @@ Released under the MIT license: http://jsbin.mit-license.org
       return Math.pow(suma, 1 / 2);
     }
 
+  </script>
+</body>
+
+</html>
   </script>
 </body>
 
