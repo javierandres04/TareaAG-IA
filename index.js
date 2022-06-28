@@ -1,7 +1,7 @@
 const cantGeneraciones = 100;
 let generaciones = 0;
 var img = new Image;
-var src = "https://i.picsum.photos/id/9/200/300.jpg?hmac=BguC5kAGl-YR4FEjhjm0b2XWbynYsk3s3QQZUie5aBo";
+var src = "https://i.picsum.photos/id/9/200/300.jpg?hmac=BguC5kAGl-YR4FEjhjm0b2XWbynYsk3s3QQZUie5aBo"; //"https://picsum.photos/200/300";
 var cvs = document.getElementById('canvas');
 var ctx = cvs.getContext('2d');
 img.crossOrigin = "Anonymous";
@@ -148,7 +148,6 @@ document.getElementById('Avanzar').onclick = () => {
         similarity: 0.0
       };
       cruzarIndividuos(canvasObj);
-      mutarIndividuo(canvasObj);
       dataVector.push(canvasObj);
       if (index == cantGeneraciones - 1) {
         row.appendChild(canvas[i]);
@@ -159,6 +158,11 @@ document.getElementById('Avanzar').onclick = () => {
       for (let i = 0; i < dataVector.length; i++) {
         dibujarFiguras(context[i], dataVector[i]);
       }
+      dataVector.sort(function (a, b) { return a.similarity - b.similarity });
+      let mejorIndividuo = document.createElement("p");
+      let row = table.insertRow(table.rows.length);
+      mejorIndividuo.innerText = `El mejor individuo de la generación ${generaciones} tiene aptitud ${dataVector[0].similarity}`;
+      row.appendChild(mejorIndividuo);
     }
   }
 }
@@ -235,13 +239,13 @@ const mutarIndividuo = (canvasObj) => {
   let indiceMutacion = Math.floor(Math.random() * mutaciones.length);
   MutationProbability = Math.floor(Math.random() * 100);
 
-  if (MutationProbability < 25) {
+  if (MutationProbability <= 15) {
     mutacion = mutaciones[indiceMutacion];
     mutacion(canvasObj.Figures);
     mutaciones.splice(indiceMutacion, 1);
     for (let i = 0; i < mutaciones.length; i++) {
       MutationProbability = Math.floor(Math.random() * 100);
-      if (MutationProbability < 50) {
+      if (MutationProbability <= 30) {
         indiceMutacion = Math.floor(Math.random() * mutaciones.length);
         mutacion = mutaciones[indiceMutacion];
         mutacion(canvasObj.Figures);
@@ -275,7 +279,10 @@ const calcularAptitud = (vectorIndividuos) => {
 }
 
 const seleccion = () => {
-  vectorIndividuos = dataVector.concat(oldDataVector);
+  let vectorIndividuos = dataVector.concat(oldDataVector);
+  for (let i = 0; i < vectorIndividuos.length; i++) {
+    mutarIndividuo(vectorIndividuos[i]);
+  }
   calcularAptitud(vectorIndividuos);
   dataVector = [];
   vectorIndividuos.sort(function (a, b) { return a.similarity - b.similarity });
@@ -321,8 +328,10 @@ const dibujarFiguras = (context, canvasObj) => {
       drawCircle(context, theFigure.x1, theFigure.y1, theFigure.radius, theFigure.fill, 3, theFigure.stroke);
     }
   }
+  if (canvasObj.similarity > 0) {
+    context.fillText(canvasObj.similarity, 10, 95);
+  }
 
-  context.fillText(canvasObj.similarity, 10, 95);
 }
 
 const generarLinea = (figures) => {
@@ -424,8 +433,8 @@ function drawRectangle(context, x1, y1, x2, y2, fill, lineWidth, stroke) {
   context.fillStyle = fill;
   context.fill();
   context.lineWidth = lineWidth;
-  context.strokeStyle = stroke;
-  context.stroke();
+  //context.strokeStyle = stroke;
+  //context.stroke();
 }
 
 function drawLine(context, x1, y1, x2, y2, lineWidth, stroke) {
@@ -435,7 +444,6 @@ function drawLine(context, x1, y1, x2, y2, lineWidth, stroke) {
   context.lineWidth = lineWidth;
   context.strokeStyle = stroke;
   context.stroke();
-  stroke
 }
 
 function drawCircle(context, x, y, radius, fill, lineWidth, stroke) {
@@ -444,8 +452,8 @@ function drawCircle(context, x, y, radius, fill, lineWidth, stroke) {
   context.fillStyle = fill;
   context.fill();
   context.lineWidth = lineWidth;
-  context.strokeStyle = stroke;
-  context.stroke();
+  //context.strokeStyle = stroke;
+  //context.stroke();
 }
 
 
