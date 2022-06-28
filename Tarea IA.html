@@ -30,7 +30,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
   </style>
   <script>
-
+    const cantGeneraciones = 100;
     let generaciones = 0;
     var img = new Image;
     var src = "https://i.picsum.photos/id/9/200/300.jpg?hmac=BguC5kAGl-YR4FEjhjm0b2XWbynYsk3s3QQZUie5aBo";
@@ -51,11 +51,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     img.onload = function () {
       ctx.drawImage(img, 0, 0);
       imgData = ctx.getImageData(0, 0, 100, 100);
-      table = document.getElementById('table');
-      row = table.insertRow(table.rows.length);
-      h2 = document.createElement('h2');
-      h2.innerText = `Generación: ${generaciones}`
-      row.appendChild(h2);
+      drawHeader();
       for (let i = 0; i < nImages; i++) {
         if (i % 5 == 0) {
           row = table.insertRow(table.rows.length);
@@ -163,18 +159,22 @@ Released under the MIT license: http://jsbin.mit-license.org
     */
 
     document.getElementById('Avanzar').onclick = () => {
-      for (let index = 0; index < 200; index++) {
+      for (let index = 0; index < cantGeneraciones; index++) {
         oldDataVector = dataVector;
         dataVector = [];
         generaciones++;
-        drawHeader();
+        if (index == cantGeneraciones - 1) {
+          drawHeader();
+        }
         for (let i = 0; i < nImages; i++) {
-          if (i % 5 == 0) {
-            row = table.insertRow(table.rows.length);
+          if (index == cantGeneraciones - 1) {
+            if (i % 5 == 0) {
+              row = table.insertRow(table.rows.length);
+            }
+            canvas[i] = document.createElement("canvas");
+            canvas[i].width = canvas[i].height = "100";
+            context[i] = canvas[i].getContext('2d');
           }
-          canvas[i] = document.createElement("canvas");
-          canvas[i].width = canvas[i].height = "100";
-          context[i] = canvas[i].getContext('2d');
           let canvasObj = {
             Figures: [],
             similarity: 0.0
@@ -182,11 +182,15 @@ Released under the MIT license: http://jsbin.mit-license.org
           cruzarIndividuos(canvasObj);
           mutarIndividuo(canvasObj);
           dataVector.push(canvasObj);
-          row.appendChild(canvas[i]);
+          if (index == cantGeneraciones - 1) {
+            row.appendChild(canvas[i]);
+          }
         }
         seleccion();
-        for (let i = 0; i < dataVector.length; i++) {
-          dibujarFiguras(context[i], dataVector[i]);
+        if (index == cantGeneraciones - 1) {
+          for (let i = 0; i < dataVector.length; i++) {
+            dibujarFiguras(context[i], dataVector[i]);
+          }
         }
       }
     }
