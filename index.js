@@ -1,7 +1,7 @@
 const cantGeneraciones = 100;
 let generaciones = 0;
 var img = new Image;
-var src = "https://i.picsum.photos/id/9/200/300.jpg?hmac=BguC5kAGl-YR4FEjhjm0b2XWbynYsk3s3QQZUie5aBo"; //"https://picsum.photos/200/300";
+var src = "https://picsum.photos/200/300";//"https://i.picsum.photos/id/9/200/300.jpg?hmac=BguC5kAGl-YR4FEjhjm0b2XWbynYsk3s3QQZUie5aBo";
 var cvs = document.getElementById('canvas');
 var ctx = cvs.getContext('2d');
 img.crossOrigin = "Anonymous";
