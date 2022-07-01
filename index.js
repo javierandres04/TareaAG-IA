@@ -1,5 +1,9 @@
+// Parametros //////////////////
 const cantGeneraciones = 100;
-let generaciones = 0;
+const probDeMutar = 15;
+const probMasDeUnaMutación = 30;
+////////////////////////////////
+let generacionActual = 0;
 var img = new Image;
 var src = "https://picsum.photos/200/300";//"https://i.picsum.photos/id/9/200/300.jpg?hmac=BguC5kAGl-YR4FEjhjm0b2XWbynYsk3s3QQZUie5aBo";
 var cvs = document.getElementById('canvas');
@@ -49,7 +53,7 @@ const drawHeader = () => {
   table = document.getElementById('table');
   row = table.insertRow(table.rows.length);
   h2 = document.createElement('h2');
-  h2.innerText = `Generación: ${generaciones}`
+  h2.innerText = `Generación: ${generacionActual}`
   row.appendChild(h2);
   let canvas = document.createElement('canvas');
   canvas.width = canvas.height = '100';
@@ -130,7 +134,7 @@ document.getElementById('Avanzar').onclick = () => {
   for (let index = 0; index < cantGeneraciones; index++) {
     oldDataVector = dataVector;
     dataVector = [];
-    generaciones++;
+    generacionActual++;
     if (index == cantGeneraciones - 1) {
       drawHeader();
     }
@@ -161,7 +165,7 @@ document.getElementById('Avanzar').onclick = () => {
       dataVector.sort(function (a, b) { return a.similarity - b.similarity });
       let mejorIndividuo = document.createElement("p");
       let row = table.insertRow(table.rows.length);
-      mejorIndividuo.innerText = `El mejor individuo de la generación ${generaciones} tiene aptitud ${dataVector[0].similarity}`;
+      mejorIndividuo.innerText = `El mejor individuo de la generación ${generacionActual} tiene aptitud ${dataVector[0].similarity}`;
       row.appendChild(mejorIndividuo);
     }
   }
@@ -239,13 +243,13 @@ const mutarIndividuo = (canvasObj) => {
   let indiceMutacion = Math.floor(Math.random() * mutaciones.length);
   MutationProbability = Math.floor(Math.random() * 100);
 
-  if (MutationProbability <= 15) {
+  if (MutationProbability <= probDeMutar) {
     mutacion = mutaciones[indiceMutacion];
     mutacion(canvasObj.Figures);
     mutaciones.splice(indiceMutacion, 1);
     for (let i = 0; i < mutaciones.length; i++) {
       MutationProbability = Math.floor(Math.random() * 100);
-      if (MutationProbability <= 30) {
+      if (MutationProbability <= probMasDeUnaMutación) {
         indiceMutacion = Math.floor(Math.random() * mutaciones.length);
         mutacion = mutaciones[indiceMutacion];
         mutacion(canvasObj.Figures);
